@@ -1,9 +1,11 @@
 # SpacetimeDB architecture -- the real-time backbone
 
 How SpacetimeDB is wired into Crash as the backend for the multiplayer marketplace and live
-auctions. This is the design spec for `spacetime-module/`. It is written at the contract level;
-where it shows Rust, that is the target shape against the SpacetimeDB 1.3 module API (the exact
-scheduled-reducer and index macros are confirmed against the live docs before each is written in).
+auctions. This mirrors the shipped module in `spacetime-module/src/lib.rs`, which compiles cleanly
+against the pinned `spacetimedb = "1.3.0"` crate (`spacetime build` -> wasm32 artifact). The Rust
+shown here is the real schema: `name = ...` table macros, `ctx.sender` / `ctx.timestamp` as fields,
+the 1.x spelling the compiler accepts. (The current web docs are a 2.0 snapshot using `accessor =` /
+`ctx.sender()`; do not "fix" this toward them without re-pinning the crate.)
 
 ## The one idea
 
@@ -57,7 +59,7 @@ Public tables are client-visible (subscribable). Ported from `marketplace-server
 // An item for sale: agent | skill | workflow | tool.
 #[spacetimedb::table(name = listing, public)]
 pub struct Listing {
-    #[primary_key] id: u64,          // auto-assigned (see #[auto_inc])
+    #[primary_key] #[auto_inc] id: u64,          // auto-assigned (see #[auto_inc])
     name: String,
     blurb: String,
     category: String,                // "agent" | "skill" | "workflow" | "tool"
@@ -73,8 +75,8 @@ pub struct Listing {
 // A live auction over a listing.
 #[spacetimedb::table(name = auction, public)]
 pub struct Auction {
-    #[primary_key] id: u64,
-    listing_id: u64,
+    #[primary_key] #[auto_inc] id: u64,
+    #[index(btree)] listing_id: u64, // settle_auction & clients look up by listing
     high_bid_minor: u64,             // current high bid (0 = no bids yet)
     high_bidder: Option<Identity>,
     min_increment_minor: u64,
@@ -86,19 +88,22 @@ pub struct Auction {
 #[spacetimedb::table(name = bid, public)]
 pub struct Bid {
     #[primary_key] #[auto_inc] id: u64,
-    auction_id: u64,
+    #[index(btree)] auction_id: u64, // pull every bid for an auction
     bidder: Identity,
     amount_minor: u64,
     at: Timestamp,
 }
 
-// A settled (or settling) sale.
-#[spacetimedb::table(name = order, public)]
-pub struct Order {
+// A settled (or settling) sale. The spec called this `order`, but `ORDER` is a
+// SQL reserved word, so the shipped table/struct is `sale`; the reducer arg is
+// `sale_id` and the engine subscribes to `... FROM sale WHERE payment_status ...`.
+#[spacetimedb::table(name = sale, public)]
+pub struct Sale {
     #[primary_key] #[auto_inc] id: u64,
     listing_id: u64,
     buyer: Identity,
     price_minor: u64,
+    #[index(btree)]                  // the engine subscribes on this column
     payment_status: String,          // "awaiting_payment" | "settled" | "failed"
     tx_ref: Option<String>,          // on-chain reference once record_payment writes it
     at: Timestamp,
@@ -116,11 +121,30 @@ pub struct Agent {
 #[spacetimedb::table(name = activity, public)]
 pub struct Activity {
     #[primary_key] #[auto_inc] id: u64,
-    kind: String,                    // "listed" | "bid" | "acquired" | "settled"
+    kind: String,                    // "listed" | "bid" | "acquired" | "won" | "paid"
     listing_id: u64,
     actor: Identity,
     actor_name: String,
     at: Timestamp,
+}
+
+// Scheduled table that arms settle_auction. SpacetimeDB fires the bound reducer
+// for each row when its scheduled_at is due. PRIVATE (no `public`): it is a
+// server-side timer, not client state. Carries the auction_id as payload.
+#[spacetimedb::table(name = settle_schedule, scheduled(settle_auction))]
+pub struct SettleSchedule {
+    #[primary_key] #[auto_inc] id: u64,
+    auction_id: u64,
+    scheduled_at: ScheduleAt,
+}
+
+// Private allowlist of identities allowed to finalize payments via record_payment.
+// NOT public: clients cannot read or subscribe to it. The engine's x402 bridge
+// claims this role once at startup (claim_payment_bridge); thereafter only that
+// identity may mark a sale paid, so a random client cannot forge a settled sale.
+#[spacetimedb::table(name = payment_bridge)]
+pub struct PaymentBridge {
+    #[primary_key] identity: Identity,
 }
 ```
 
@@ -136,8 +160,10 @@ fn create_listing(ctx, name, blurb, category, price_minor, tags) { ... }
 
 #[spacetimedb::reducer]
 fn create_auction(ctx, listing_id, start_minor, min_increment_minor, duration_secs) { ... }
-// insert Auction { ends_at: ctx.timestamp + duration, status: "open", ... }
-// schedule settle_auction at ends_at (see below)
+// require the listing exists and has no other "open" auction (one live auction per listing);
+// cap duration at 7 days and add fallibly (checked_add_duration -> Err, never a panic);
+// insert Auction { ends_at, status: "open", ... };
+// insert a one-shot SettleSchedule { scheduled_at: ScheduleAt::Time(ends_at) } to arm settlement
 
 #[spacetimedb::reducer]
 fn place_bid(ctx, auction_id, amount_minor) { ... }
@@ -147,7 +173,7 @@ fn place_bid(ctx, auction_id, amount_minor) { ... }
 
 #[spacetimedb::reducer]
 fn buy_now(ctx, listing_id) { ... }
-// insert Order { buyer: ctx.sender, payment_status: "awaiting_payment" };
+// insert Sale { buyer: ctx.sender, payment_status: "awaiting_payment", price snapshot from listing };
 // bump Listing.acquired_count; insert Activity { kind: "acquired" }
 
 #[spacetimedb::reducer]
@@ -155,18 +181,31 @@ fn register_agent(ctx, name, blurb) { ... }
 // upsert Agent { identity: ctx.sender, name, blurb }
 
 #[spacetimedb::reducer]
-fn record_payment(ctx, order_id, ok, tx_ref, code) { ... }
-// update Order.payment_status -> "settled" | "failed"; set tx_ref; insert Activity { kind: "settled" }
+fn claim_payment_bridge(ctx) { ... }
+// trust-on-first-use: the first caller becomes the sole payment finalizer; re-claiming is a no-op,
+// any other caller is rejected. The engine's x402 bridge calls this once on connect.
+
+#[spacetimedb::reducer]
+fn record_payment(ctx, sale_id, ok, tx_ref, _code) { ... }
+// guard: caller must be the claimed payment_bridge identity, else reject (no forged "paid" sales);
+// require the sale is still "awaiting_payment";
+// set Sale.payment_status -> "settled" | "failed"; attach tx_ref only on success;
+// on success only, insert Activity { kind: "paid" } (a failure is never broadcast).
+// SECURITY: the `_code` failure arg is accepted for ABI parity but deliberately NOT persisted --
+// nothing about a failure beyond the bare "failed" status crosses back into the database.
 ```
 
 ### Scheduled settlement -- the auction clock is real
 
-SpacetimeDB can schedule a reducer to fire at a `Timestamp`. `create_auction` schedules
-`settle_auction` for `ends_at`. When it fires -- server-side, with no client awake -- it:
+SpacetimeDB fires a reducer for each due `SettleSchedule` row. `create_auction` inserts a one-shot
+row scheduled for `ends_at`, so `settle_auction` runs -- server-side, with no client awake -- and:
 
-1. Loads the auction; if already `settled`, returns (idempotent).
-2. Picks the high bidder; writes an `Order { payment_status: "awaiting_payment" }`.
-3. Marks the auction `settled` and appends an `Activity { kind: "settled" }`.
+1. Checks `ctx.sender == ctx.identity()` (only the scheduler may run it) and loads the auction;
+   if the auction is gone or already `settled`, it returns cleanly (idempotent).
+2. If there is a high bidder it writes a `Sale { payment_status: "awaiting_payment" }` for the
+   winner and bumps the listing's `acquired_count` (an auction win counts like a buy-now).
+3. Marks the auction `settled` and appends an `Activity { kind: "won" }`. With no bids it just
+   closes the auction (no sale, no activity row).
 
 Because settlement lives in the database on a schedule, the countdown every client renders is
 backed by a real server event, not a client-side timer that lies when the tab is closed.
@@ -177,18 +216,20 @@ Reducers are deterministic and sandboxed: **no outbound HTTP or chain calls insi
 payment cannot run inside `settle_auction`. The flow crosses the database boundary on purpose:
 
 ```
-settle_auction (in DB)            engine (outside DB)              record_payment (in DB)
-  writes Order                      subscribed to orders             writes tx_ref + status
+settle_auction / buy_now (in DB)  engine (outside DB)              record_payment (in DB)
+  writes Sale                       subscribed to sales              writes tx_ref + status
   status=awaiting_payment   --->    where status=awaiting    --->    status=settled|failed
                                     runs x402 USDC settlement
                                     (ERC-3009 gasless, Base)
 ```
 
-The engine is itself a SpacetimeDB client subscribed to `SELECT * FROM order WHERE payment_status
-= 'awaiting_payment'`. When such a row appears it runs the existing x402 buyer
-(`backend/src/payments/buyer.ts`), then calls `record_payment` with the on-chain `tx_ref` (or a
-synthetic failure `code`). The database stays pure; the real payment rail stays real; and only a
-synthetic code -- never `err.message`, a key, or a response body -- is ever written back.
+The engine connects as its own SpacetimeDB client, calls `claim_payment_bridge` once to take the
+payment-finalizer role, then subscribes to `SELECT * FROM sale WHERE payment_status =
+'awaiting_payment'`. When such a row appears it runs the existing x402 buyer
+(`backend/src/payments/buyer.ts`), then calls `record_payment` with the on-chain `tx_ref` (or, on
+failure, a synthetic `code`). `record_payment` rejects any caller that is not the claimed bridge, so
+a random client cannot forge a paid sale. The database stays pure; the real payment rail stays real;
+and only a synthetic status -- never `err.message`, a key, or a response body -- is ever written back.
 
 ## Subscriptions (what each client reads)
 
@@ -196,7 +237,7 @@ synthetic code -- never `err.message`, a key, or a response body -- is ever writ
 |--------|---------------|
 | Tauri renderer | `listing`, `auction`, `bid` (for the open auction), `activity` -- the live storefront + room |
 | An agent participant | the same catalog + auction tables it wants to act in |
-| The engine (payment bridge) | `order WHERE payment_status = 'awaiting_payment'` |
+| The engine (payment bridge) | `sale WHERE payment_status = 'awaiting_payment'` |
 
 The renderer subscribes to SpacetimeDB directly for marketplace + auction state; the engine's
 35-event WebSocket protocol stays focused on the single-user agent run (chat, plan, tool activity).
