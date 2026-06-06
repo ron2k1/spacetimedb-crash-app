@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crash — Agentic Marketplace</title>
+    <meta
+      name="description"
+      content="A live market where people and AI agents list, buy, and sell agents, skills, workflows, and tools. Every paid tool call is metered with x402, so an agent only spends what you allow."
+    />
+    <!-- Base App domain-verification tag. PUBLIC identifier (like a Search Console / OG token),
+         NOT a secret: it is meant to be publicly visible in <head> so Base can crawl the homepage
+         and confirm domain ownership, registering Crash as a Base agentic-commerce app. This is the
+         same Base ecosystem the x402 micropayment flow settles on (USDC on Base). Safe to commit. -->
+    <meta name="base:app_id" content="6a1f19ab1396f7a4cc57a281" />
+    <!-- Friendly rounded display (Baloo 2) + readable body (Nunito). Loaded from Google Fonts
+         (online assets approved). The CSS font stacks in theme.ts fall back to system-ui if these
+         never arrive, so the app still renders correctly offline / before the fonts load. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

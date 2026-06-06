@@ -1,0 +1,10 @@
+{
+  "id": "setup-skills-and-plugins",
+  "title": "Set Up Skills and Plugins",
+  "summary": "Learn what skills and plugins are, install one from the marketplace, and make your own with the Skill Creator.",
+  "steps": [
+    { "title": "What is a skill?", "file": "01-what-is-a-skill.md" },
+    { "title": "Install from the marketplace", "file": "02-install-from-the-marketplace.md" },
+    { "title": "Make your own", "file": "03-make-your-own.md" }
+  ]
+}

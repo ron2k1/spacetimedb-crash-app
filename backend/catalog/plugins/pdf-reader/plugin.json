@@ -1,0 +1,5 @@
+{
+  "name": "pdf-reader",
+  "version": "0.1.0",
+  "description": "Lets the assistant open a PDF file and read its text so it can summarize or answer questions about the document."
+}

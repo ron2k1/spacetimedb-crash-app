@@ -1,0 +1,5 @@
+{
+  "name": "web-search",
+  "version": "0.1.0",
+  "description": "Lets the assistant look things up on the web so it can answer with current information instead of guessing."
+}

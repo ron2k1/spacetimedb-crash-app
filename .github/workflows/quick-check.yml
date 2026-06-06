@@ -1,0 +1,122 @@
+# .github/workflows/quick-check.yml
+#
+# Crash -- pre-merge fast-feedback loop for the pnpm + Cargo monorepo.
+# Two jobs run in parallel on every push to main and every PR targeting main:
+#   ts   -- typecheck + unit tests across the pnpm workspace (ubuntu)
+#   rust -- cargo test for the Tauri shell crate (windows, the demo target OS)
+# Target: ts under ~3 min on a warm cache; rust under ~5 min warm.
+#
+# The tag-gated release bundle lives in release.yml.
+
+name: quick-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel any in-flight quick-check for the same PR/sha when a new push lands.
+concurrency:
+  group: quick-check-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ts:
+    name: typecheck + test (pnpm workspace)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # action-setup@v4 reads the pnpm version from package.json "packageManager".
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # @crash/protocol exposes its API through compiled output
+      # (exports -> dist/index.d.ts + dist/index.js), so downstream packages
+      # (@crash/engine, and the shell's tests) cannot resolve it until it is
+      # built. dist/ is gitignored, so a fresh CI checkout must build it first
+      # -- both for typecheck (needs the .d.ts) and tests (need the .js).
+      - name: Build shared protocol package
+        run: pnpm --filter @crash/protocol run build
+
+      - name: Typecheck
+        run: pnpm -r run typecheck
+
+      - name: Test
+        run: pnpm -r run test:run
+
+  rust:
+    name: cargo test (tauri shell, windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # action-setup@v4 reads the pnpm version from package.json "packageManager".
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # tauri-build (the shell's build.rs) resolves frontendDist ("../dist") at
+      # COMPILE time, so cargo needs the web bundle present before it runs.
+      # `pnpm -r run build` compiles @crash/protocol's dist and the r3f-shell
+      # Vite bundle (frontend/r3f-shell/dist) that tauri-build looks for. The
+      # config's beforeBuildCommand only fires on `tauri build`, not on
+      # `cargo test`, so the frontend is built explicitly here.
+      - name: Build workspace (protocol + shell web bundle)
+        run: pnpm -r run build
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # Scope the cache to the repo's only Cargo workspace.
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/r3f-shell/src-tauri
+
+      # tauri-build's build.rs verifies every externalBin + resource path
+      # declared in tauri.conf.json EXISTS at compile time. The engine sidecar
+      # (binaries/crash-engine-<triple>.exe) and the staged catalog/ are both
+      # gitignored build artifacts produced by installer/build-engine-exe.mjs,
+      # which only release.yml runs. quick-check just compiles the crate and
+      # runs the two pure-logic unit tests (they never exec the sidecar), so a
+      # zero-byte placeholder + the committed backend/catalog satisfies the
+      # existence check honestly -- the real engine is built and proven on tag
+      # in release.yml.
+      - name: Stage sidecar placeholder + catalog for tauri-build
+        shell: pwsh
+        run: |
+          $tauri = "frontend/r3f-shell/src-tauri"
+          New-Item -ItemType Directory -Force -Path "$tauri/binaries" | Out-Null
+          New-Item -ItemType File -Force -Path "$tauri/binaries/crash-engine-x86_64-pc-windows-msvc.exe" | Out-Null
+          Copy-Item -Recurse -Force "backend/catalog" "$tauri/catalog"
+
+      - name: Cargo test (locked)
+        run: cargo test --manifest-path frontend/r3f-shell/src-tauri/Cargo.toml --locked

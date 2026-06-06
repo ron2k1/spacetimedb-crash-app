@@ -1,0 +1,33 @@
+{
+  "name": "@crash/marketplace-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --import tsx ./src/store.test.ts ./src/server.test.ts ./src/run.test.ts"
+  },
+  "dependencies": {
+    "@x402/core": "^2.14.0",
+    "@x402/evm": "^2.14.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.22.2",
+    "nanoid": "^5.0.9",
+    "viem": "^2.48.11",
+    "ws": "^8.21.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.2",
+    "typescript": "~5.8.3"
+  }
+}

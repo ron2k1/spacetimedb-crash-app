@@ -1,0 +1,12 @@
+[
+  {
+    "id": "web-search",
+    "name": "Web Search",
+    "description": "Lets the assistant look things up on the web so it can answer with current information instead of guessing."
+  },
+  {
+    "id": "pdf-reader",
+    "name": "PDF Reader",
+    "description": "Lets the assistant open a PDF file and read its text so it can summarize or answer questions about the document."
+  }
+]

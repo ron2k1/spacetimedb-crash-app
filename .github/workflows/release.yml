@@ -1,0 +1,112 @@
+# .github/workflows/release.yml
+#
+# Crash -- tag-gated release build. Fires ONLY on a v* tag push, never on a
+# normal branch push or PR, so it stays out of the pre-merge feedback loop
+# (that fast loop lives in quick-check.yml).
+#
+# Pipeline (single Windows job, the Monday demo target OS):
+#   1. install the pnpm workspace
+#   2. build @crash/protocol then @crash/engine (tsc -> dist/)
+#   3. package the engine as a single self-contained sidecar exe and name it
+#      with the Windows target triple Tauri expects (crash-engine-<triple>.exe)
+#   4. tauri-action runs `tauri build` (its beforeBuildCommand builds the web
+#      bundle), produces the NSIS installer, then creates a GitHub Release and
+#      uploads the installer as a release asset.
+#
+# The macOS / Linux matrix is deferred; Windows is the only 6/1 target.
+#
+# SECURITY: this workflow never reads, prints, or persists the per-session
+# capability token. That token is minted at runtime by the engine on the END
+# USER's machine and written to ~/Crash/.runtime/socket.json (mode 0600); it
+# does not exist at build time and must never be baked into the bundle.
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# tauri-action needs write access to create the Release and upload assets.
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    name: build + release tauri bundle (windows)
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # action-setup@v4 reads the pnpm version from the root package.json
+      # "packageManager" field.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # @crash/protocol exposes its API through compiled output (dist/), so the
+      # engine cannot resolve it until protocol is built; then build the engine.
+      - name: Build protocol + engine
+        run: |
+          pnpm --filter @crash/protocol run build
+          pnpm --filter @crash/engine run build
+
+      # Package the engine into a single self-contained exe via the SAME script the
+      # local build runs (installer/build-engine-exe.mjs), so the CI and local
+      # packaging recipes can never drift -- the recipe lives in exactly one file.
+      #
+      # It uses Node SEA (Single Executable Applications): esbuild bundles the ESM
+      # engine + `ws` into one CJS file, `node --experimental-sea-config` turns that
+      # into a blob, the running node.exe is copied as the base, and postject injects
+      # the blob under the SEA fuse (auto-detected from the binary, so a Node-major
+      # bump can't break it). Output is the triple-suffixed exe that
+      # bundle.externalBin resolves at bundle time:
+      #   src-tauri/binaries/crash-engine-x86_64-pc-windows-msvc.exe
+      # The script also stages backend/catalog/ -> src-tauri/catalog/ for the
+      # bundle.resources glob (the packaged marketplace reads it via CRASH_CATALOG_ROOT).
+      #
+      # This replaces the earlier @yao-pkg/pkg attempt: the deploy audit flagged
+      # ESM-in-single-exe + bundling `ws` as the gating packaging risk, and SEA is the
+      # recipe that resolved it (proven locally end to end -- exe boots + writes a
+      # valid socket.json). SECURITY: only packages code; never touches the runtime
+      # per-session token, which is minted on the end user's machine.
+      - name: Build engine sidecar exe (Node SEA)
+        run: node installer/build-engine-exe.mjs
+        shell: pwsh
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # Scope the cache to the repo's only Cargo workspace.
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/r3f-shell/src-tauri
+
+      # tauri-action runs the Tauri build (its beforeBuildCommand builds the web
+      # bundle), then creates the GitHub Release and uploads the NSIS installer.
+      # projectPath points at the shell crate's parent so the action finds
+      # src-tauri/. __VERSION__ is replaced with the app version from tauri.conf.json.
+      - name: Build + publish release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: frontend/r3f-shell
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Crash __VERSION__'
+          releaseBody: 'Download the Windows installer (Crash_<version>_x64-setup.exe) from the assets below, then run it. See docs/DEPLOYMENT.md for the install + run flow.'
+          releaseDraft: true
+          prerelease: false
+          args: --bundles nsis

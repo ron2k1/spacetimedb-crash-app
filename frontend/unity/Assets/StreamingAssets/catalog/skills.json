@@ -1,0 +1,17 @@
+[
+  {
+    "id": "meeting-notes",
+    "name": "Meeting Notes",
+    "description": "Use this when you have messy notes from a meeting and want a clean summary plus a list of action items."
+  },
+  {
+    "id": "study-buddy",
+    "name": "Study Buddy",
+    "description": "Use this when you have study material and want practice questions and flashcards to quiz yourself."
+  },
+  {
+    "id": "inbox-triage",
+    "name": "Inbox Triage",
+    "description": "Use this when you have a batch of messages and want them sorted by priority with draft replies ready to review."
+  }
+]

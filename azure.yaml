@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+#
+# Crash -- azd project manifest
+# Two services:
+#   marketplace  -> Azure Container Apps  (Node/Express+WS, port 8787)
+#   web          -> Azure Static Web Apps (Vite React SPA, dist/)
+#
+# Run order:  azd auth login  ->  azd env new crash-hackathon  ->
+#             azd env set <SECRET_VARS>  ->  azd up
+# See docs/DEPLOY.md for the full runbook.
+
+name: crash
+metadata:
+  template: crash@0.1.0
+
+infra:
+  provider: bicep
+  path: infra
+
+services:
+  marketplace:
+    project: ./marketplace-server
+    language: ts
+    host: containerapp
+    docker:
+      # Dockerfile lives inside the service directory.
+      path: ./marketplace-server/Dockerfile
+      # Build context must be the REPO ROOT so Docker can reach
+      # pnpm-lock.yaml and pnpm-workspace.yaml (monorepo lockfile).
+      context: .
+    env:
+      PORT: "8787"
+
+  web:
+    project: ./frontend/r3f-shell
+    language: ts
+    host: staticwebapp
+    dist: dist
+    # Build command for the SPA.  azd calls this before deploying the built
+    # artefact to the Static Web App.  VITE_MARKETPLACE_URL must be set in the
+    # azd environment BEFORE `azd deploy web` (or `azd up`) so Vite inlines the
+    # ACA FQDN at bundle time.  See docs/DEPLOY.md step (e).
+    hooks:
+      preBuild:
+        shell: sh
+        run: |
+          cd frontend/r3f-shell && \
+          corepack enable && \
+          pnpm install --frozen-lockfile && \
+          pnpm run build

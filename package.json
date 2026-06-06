@@ -1,0 +1,16 @@
+{
+  "name": "crash-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test:run",
+    "typecheck": "pnpm -r run typecheck",
+    "shell:dev": "pnpm --filter @crash/r3f-shell run tauri dev",
+    "shell:build": "pnpm --filter @crash/r3f-shell run tauri build"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

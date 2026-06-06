@@ -1,0 +1,36 @@
+{
+  "name": "@crash/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "crash-engine": "./dist/host.js",
+    "crash-run": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:run": "vitest run",
+    "start": "node dist/host.js",
+    "run:headless": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@crash/protocol": "workspace:*",
+    "@x402/core": "^2.14.0",
+    "@x402/evm": "^2.14.0",
+    "@x402/express": "^2.14.0",
+    "@x402/paywall": "^2.14.0",
+    "express": "^4.22.2",
+    "viem": "^2.48.11",
+    "ws": "^8.21.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "typescript": "~5.8.3",
+    "vitest": "^1.6.1"
+  }
+}

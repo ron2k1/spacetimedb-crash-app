@@ -1,0 +1,5 @@
+packages:
+  - protocol
+  - backend
+  - frontend/r3f-shell
+  - marketplace-server

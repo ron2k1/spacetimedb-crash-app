@@ -1,0 +1,18 @@
+# Crash -- repo-root git attributes.
+#
+# IMPORTANT: [attr] macro DEFINITIONS are honored only in the top-level
+# .gitattributes (or .git/info/attributes) -- never in a subdirectory one.
+# frontend/unity/.gitattributes (the standard Unity template) REFERENCES these
+# macros (unity-json / unity-yaml / lfs) but cannot define them, so they must
+# live here. Without this file git warns "... not allowed" on every command and
+# the Unity merge/eol/linguist attributes silently do nothing.
+[attr]lfs               filter=lfs diff=lfs merge=lfs -text
+[attr]unity-json        eol=lf linguist-language=json
+[attr]unity-yaml        merge=unityyamlmerge eol=lf linguist-language=yaml
+
+# Shared 3D model used by BOTH renderers (R3F web shell + Unity client).
+# Fox.glb is ~159 KB; we commit it directly rather than via git-lfs so a fresh
+# clone needs no `git lfs install` / `git lfs pull` -- the model is present for
+# both renderers out of the box. `binary` => git won't normalize or diff it.
+*.glb                   binary
+*.gltf                  text linguist-language=json

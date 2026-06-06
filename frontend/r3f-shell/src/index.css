@@ -1,0 +1,151 @@
+@import "tailwindcss";
+/* tw-animate-css: extra keyframe utilities (fade/zoom/slide) that the vendored shadcn blocks
+   (auth-fuse, 8bit-chart) lean on beyond Tailwind's built-in `animate-*`. Imported once here so
+   every component can use them; harmless if a given screen uses none. */
+@import "tw-animate-css";
+
+/* shadcn/ui dark-mode variant: `dark:` utilities apply under any `.dark` ancestor. We set
+   <html class="dark"> in index.html, so the whole app is dark by default. */
+@custom-variant dark (&:is(.dark *));
+
+/* Map shadcn semantic tokens -> Tailwind color utilities, so `bg-background`,
+   `text-card-foreground`, `border-border`, `text-muted-foreground`, `ring-ring`, etc. all
+   resolve. The `inline` form resolves each var at use-site, so the SAME --background var is
+   readable both as a utility class AND directly from JS/CSS if ever needed. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  /* Chart palette -> enables `fill-chart-1`, `stroke-chart-2`, `text-[var(--chart-3)]`, etc.
+     Consumed by the 8bit step-area chart. Violet-forward so data viz stays on-brand with Crash. */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* Aceternity <Spotlight> applies the `animate-spotlight` class. Tailwind v4 turns any
+     --animate-* theme var into an `animate-*` utility; it pairs with the @keyframes below. */
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+}
+
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Light fallback -- unused while <html class="dark"> is set, but kept correct for completeness
+     and so a future light-mode toggle has sane values. */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.62 0.21 295);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.62 0.21 295);
+  --chart-1: oklch(0.62 0.21 295);
+  --chart-2: oklch(0.7 0.13 195);
+  --chart-3: oklch(0.77 0.14 85);
+  --chart-4: oklch(0.65 0.2 25);
+  --chart-5: oklch(0.62 0.2 330);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Crash ships DARK: a deep near-black violet base with a vivid violet primary that echoes the
+   Spline Crash mascot's purple glow. This is the canonical surface the shadcn Card, Spotlight,
+   and future generated primitives read from. */
+.dark {
+  --background: oklch(0.13 0.012 286);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.17 0.015 286);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.17 0.015 286);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.62 0.21 295);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.25 0.02 286);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.25 0.02 286);
+  --muted-foreground: oklch(0.72 0.02 286);
+  --accent: oklch(0.27 0.03 295);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.62 0.21 295);
+  /* Dark chart palette: same hues, lifted lightness so lines/areas read on the near-black base. */
+  --chart-1: oklch(0.66 0.2 295);
+  --chart-2: oklch(0.72 0.13 195);
+  --chart-3: oklch(0.8 0.14 85);
+  --chart-4: oklch(0.7 0.19 25);
+  --chart-5: oklch(0.68 0.2 330);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+/* PlayingCard (components/ui/playing-card.tsx) -- theming hooks for the dynamic-background
+   skill cards. The component ships sensible literal defaults; these vars let the skill-card
+   wiring drive its palette from one place (pass e.g. outlineColor="var(--playingcard-outline-color)").
+   --playingcard-canvas-colors is a reference note: the reveal dot-matrix takes an RGB-triple
+   array prop, not a CSS color, but the value is kept here so the full token set lives together. */
+:root {
+  --playingcard-bg: #ffffff;
+  --playingcard-fg: #000000;
+  --playingcard-outline-color: #e879f9;
+  --playingcard-hover-outline-color: #6366f1;
+  --playingcard-canvas-bg: #000000;
+  --playingcard-canvas-colors: 236 72 153;
+  --playingcard-inscription-color: #3662f4;
+  --playingcard-inscription-color-hover: #f12b30;
+}
+
+.dark {
+  --playingcard-bg: #000000;
+  --playingcard-fg: #ffffff;
+  --playingcard-outline-color: #e879f9;
+  --playingcard-hover-outline-color: #6366f1;
+  --playingcard-canvas-bg: #000000;
+  --playingcard-canvas-colors: 236 72 153;
+  --playingcard-inscription-color: #3662f4;
+  --playingcard-inscription-color-hover: #f12b30;
+}

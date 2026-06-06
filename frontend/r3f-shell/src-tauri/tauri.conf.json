@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Crash",
+  "version": "0.1.0",
+  "identifier": "com.ron2k1.crash",
+  "build": {
+    "beforeDevCommand": "pnpm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:* ws://localhost:* https://prod.spline.design https://unpkg.com https://*.spline.design https://www.gstatic.com https://api.gmi-serving.com https://app.phinite.ai"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Ronil Basu",
+    "category": "Education",
+    "shortDescription": "Guided AI-literacy desktop app.",
+    "longDescription": "Crash is a guided AI-literacy desktop app. A headless engine drives an interactive 3D scene that walks you through building real, working AI skills step by step.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/crash-engine"],
+    "resources": ["catalog/**/*"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

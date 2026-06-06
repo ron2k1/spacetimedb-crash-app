@@ -1,0 +1,55 @@
+# marketplace-server/.dockerignore
+# Build context is the REPO ROOT, so paths here are relative to repo root.
+
+# Ignore heavy directories that are not needed to build marketplace-server.
+node_modules
+frontend
+backend
+.github
+.vscode
+.crash-shots
+screenshots
+installer
+curriculum
+docs
+
+# marketplace-server local artifacts
+marketplace-server/node_modules
+marketplace-server/dist
+marketplace-server/data
+
+# Root-level artifacts
+dist
+
+# Git internals
+.git
+.gitignore
+.gitattributes
+
+# Env / secrets -- never bake into images
+.env
+.env.*
+*.env
+
+# Markdown / docs (not needed at runtime)
+*.md
+CONTRIBUTING.md
+INSTRUCTIONS.md
+LICENSE
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+*.suo
+*.sw?
+.idea
+
+# pnpm debug logs
+.pnpm-debug.log*
+pnpm-debug.log*
+
+# Tauri / Rust build artifacts
+target/
+frontend/r3f-shell/src-tauri/binaries/
