@@ -6,6 +6,7 @@ import { FeaturedSpotlight } from "../ui/feature-spotlight";
 import { NavTabs } from "../ui/nav-tabs";
 import { SkillDetailDrawer } from "./SkillDetailDrawer";
 import { ListListingModal } from "./ListListingModal";
+import { AuctionPanel } from "./AuctionPanel";
 import { TestRunModal } from "../dashboard/TestRunModal";
 import { useDialogStore } from "../../store/dialogStore";
 import { useBasketStore } from "../../store/basketStore";
@@ -1226,6 +1227,11 @@ export function Marketplace() {
               />
             </section>
           )}
+
+          {/* Live auction house (unfiltered view). Humans + agents bid into the same lots in real time
+              and each lot self-settles server-side. AuctionPanel self-hides when there are no auctions,
+              so this never leaves an empty band on the store. */}
+          {filter === "all" && <AuctionPanel />}
 
           {/* The listing grid. */}
           <section>
