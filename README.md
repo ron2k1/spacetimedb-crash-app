@@ -53,7 +53,7 @@ bolted on. In Crash it is the backend:
   256-bit per-connection id). The auction house does not distinguish a person from an LLM agent --
   both connect, subscribe, and call reducers over the same wire.
 
-## What's live today vs. in progress (honest snapshot)
+## What's live today (honest snapshot)
 
 This repository was created at the **start of the SpacetimeDB hackathon (2026-06-05)** from the
 existing Crash app, then refit around SpacetimeDB. Keeping the project's no-fabrication rule:
@@ -61,17 +61,21 @@ existing Crash app, then refit around SpacetimeDB. Keeping the project's no-fabr
 | Area | State |
 |------|-------|
 | SpacetimeDB CLI 1.3.0, Rust module toolchain (Windows-native, no WSL) | **Working** -- `spacetime build` compiles offline |
-| Maincloud database `crash-y77jx` | **Provisioned** and running (empty, `0 TeV`) -- the publish target |
-| `spacetime-module/` | **Scaffolded** -- currently the quickstart template; the marketplace + auction schema below is being written into it |
-| Marketplace storefront (browse / buy / sell, live) | **Working today on the Express + WebSocket `marketplace-server` (`:8787`)** -- this is the source of truth SpacetimeDB *replaces*, and the schema spec being ported |
+| Maincloud database `crash-y77jx` | **Published and live** -- all 8 tables created; serving real listings, auctions, bids, and sales |
+| `spacetime-module/` (tables + reducers, incl. scheduled `settle_auction`) | **Published** -- the real marketplace + live-auction module compiles to WASM and runs inside Maincloud |
+| Both de-risking spikes (scheduled reducer fires `settle_auction`; a Node client connects as an STDB Identity and calls a reducer) | **Passed** -- verified live on the hosted database |
+| Desktop renderer reads marketplace + auctions from STDB **subscriptions** | **Working** -- the `@crash/r3f-shell` storefront and `AuctionPanel` render live row deltas from `crash-y77jx` |
+| Headless agents as first-class STDB clients (the bid bots) | **Working** -- each bot connects under its own Identity, registers an `agent` row, and bids reactively |
+| Live **human + agent** auction, settled server-side | **Proven end-to-end** -- a browser human and two headless agents bid in one hosted auction; it self-settles at `ends_at` and every screen updates from the subscription (see [`docs/DEMO.md`](docs/DEMO.md)) |
 | x402 USDC payment rail (ERC-3009 gasless) | **Wired** -- fails closed without a funded wallet, never fakes a settlement |
 | Tauri + React + react-three-fiber desktop shell | **Working** -- renders the marketplace and the agent run |
 | Headless engine + 35-event socket protocol | **Working** -- `PROTOCOL_VERSION = 3` |
-| Two de-risking spikes (scheduled reducer fires `settle_auction`; Node engine connects as an STDB client and calls a reducer) | **Pending** -- the go/no-go gate before the full port |
 
-The migration is deliberately staged: the storefront keeps the demo alive while the module is
-built and proven, then becomes the single source of truth. Nothing here claims SpacetimeDB is
-load-bearing before it is.
+The marketplace + auction state now lives in SpacetimeDB and drives every live mutation. The
+Express `marketplace-server` (`:8787`) remains in the tree as a curated catalog floor and as the
+schema spec it was ported from; the renderer **merges** that floor with the live STDB overlay, so
+the room stays full and beautiful while SpacetimeDB owns the source of truth for everything that
+changes. The full client wiring lives on the `feat/stdb-client-wiring` branch (see the demo doc).
 
 ## Architecture
 
@@ -115,7 +119,7 @@ than a hardcoded demo:
 
 ## The SpacetimeDB module
 
-The design being written into `spacetime-module/src/lib.rs` (ported from the storefront's
+The schema published in `spacetime-module/src/lib.rs` (ported from the storefront's
 `marketplace-server/src/types.ts` + `store.ts` domain model, plus the auction layer):
 
 **Tables (state):**
@@ -184,7 +188,7 @@ The design being written into `spacetime-module/src/lib.rs` (ported from the sto
 
 | Path | What lives here |
 |------|-----------------|
-| `spacetime-module/` | **The SpacetimeDB backend.** A Rust crate (WASM) of marketplace + auction tables and reducers, published into the `crash-y77jx` database. Currently scaffolded; the schema above is being written in. |
+| `spacetime-module/` | **The SpacetimeDB backend.** A Rust crate (WASM) of marketplace + auction tables and reducers, published into the `crash-y77jx` database and serving live. |
 | `protocol/` | The agent-run contract. Canonical **35-event** socket protocol (`events.ts`), the C# mirror (`Protocol.cs`), one example per event, and a drift-guard test. |
 | `backend/` | The headless engine (`@crash/engine`): token-gated WS server, provider-agnostic agent loop (Claude Code / Codex / deterministic), local RAG, skills I/O, the **x402 buyer + cap ledger** (`src/payments/`), and the Tavily connectors (`src/connectors/`). The engine is also the bridge that runs payments and connects agents to SpacetimeDB. |
 | `marketplace-server/` | The storefront being replaced (`@crash/marketplace-server`): Express + WebSocket (`:8787`). Its `types.ts` + `store.ts` are the schema spec for the SpacetimeDB port. Holds no secrets, no keystore. |
