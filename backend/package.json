@@ -13,7 +13,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:run": "vitest run",
     "start": "node dist/host.js",
-    "run:headless": "node dist/cli.js"
+    "run:headless": "node dist/cli.js",
+    "bot:alice": "tsx agents/agent-bot.ts alice",
+    "bot:bob": "tsx agents/agent-bot.ts bob"
   },
   "dependencies": {
     "@clockworklabs/spacetimedb-sdk": "1.3.3",

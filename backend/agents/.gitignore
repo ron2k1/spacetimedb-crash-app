@@ -1,0 +1,3 @@
+# Per-bot SpacetimeDB connection tokens (public client tokens, but kept out of git regardless).
+# Each bot persists its token here so it keeps a stable Identity across runs; never commit these.
+.tokens/
