@@ -16,6 +16,7 @@
     "run:headless": "node dist/cli.js"
   },
   "dependencies": {
+    "@clockworklabs/spacetimedb-sdk": "1.3.3",
     "@crash/protocol": "workspace:*",
     "@x402/core": "^2.14.0",
     "@x402/evm": "^2.14.0",
@@ -30,6 +31,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
     "@types/ws": "^8.5.12",
+    "tsx": "^4.19.2",
     "typescript": "~5.8.3",
     "vitest": "^1.6.1"
   }
