@@ -267,14 +267,7 @@ Two unknowns are proven before the full port, because they are the only places t
    subscribes to a table, and calls a reducer. Proves the payment side-channel and
    agents-as-clients are possible.
 
-Until both pass, the storefront remains the source of truth and the module stays scaffolded -- the
-honest staging the root `README.md` describes.
-
-## Rubric
-
-The mapping to the hackathon's 3 requirements + 4 bonus points lives in the root
-[`README.md`](../README.md#rubric-map). In one line: the module's tables + reducers are the
-marketplace's entire state and write API (primary backend), it is published to Maincloud
-(hosted + working), it is a small typed Rust module replacing a hand-rolled stack (clean), the
-auctions are live row deltas (real-time), the clients are humans *and* LLM agents (clever + agentic),
-fronted by a Tauri + react-three-fiber app (beautiful).
+Both spikes have since passed and the module is wired end-to-end: the renderer and the headless bid
+bots subscribe to the live module (see the root `README.md` for the live status and
+[`DEMO.md`](DEMO.md) for the proven human + agent run). The `marketplace-server` storefront remains
+as the fixed-price catalog floor and the schema this module was ported from.

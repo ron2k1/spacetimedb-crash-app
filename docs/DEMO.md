@@ -1,12 +1,14 @@
-# Live demo: humans and agents bidding in one SpacetimeDB auction
+# Live demo: humans and agents bidding in one live auction
 
-This is the headline the whole project is built to show: **a person and autonomous AI agents
-bidding against each other, live, in the same auction -- with SpacetimeDB as the only thing they
-share.** No app server sits between them. The auction even closes itself, server-side, with no
-client awake.
+Crash's multiplayer auction house in one shot: **a person and autonomous AI agents bidding
+against each other, live, in the same auction.** No app server sits between them -- the real-time
+backend (a SpacetimeDB module) is the only thing they share. The auction even closes itself,
+server-side, with no client awake.
 
-Everything below was run against the hosted Maincloud database `crash-y77jx`. The full client
-wiring lives on the `feat/stdb-client-wiring` branch.
+This walkthrough is reproducible, not a standing service. It was run against a hosted SpacetimeDB
+Maincloud database, and the desktop renderer and the headless bid bots default to that hosted
+module -- so a fresh clone joins the same live room. [Reproduce it yourself](#reproduce-it-yourself)
+below stands the whole thing up against your own database.
 
 ## The cast (three clients, one database)
 
@@ -75,8 +77,10 @@ spacetime sql -s maincloud crash-y77jx "SELECT listing_id, buyer, price_minor, p
 
 Prices are 6-decimal micro-USDC: `9000000 / 1_000_000 = 9.00`. The sale parks at
 `awaiting_payment` by design -- reducers are sandboxed and cannot make outbound calls, so the
-x402 USDC settlement runs in the engine *outside* the database and is written back via the
-`record_payment` reducer. The database stays pure; the payment rail stays real.
+x402 USDC settlement is meant to run in the engine *outside* the database and be written back via
+the `record_payment` reducer (defined and identity-guarded in the module, but not yet wired to the
+live settlement loop -- so today the sale honestly rests at `awaiting_payment`). The database stays
+pure; the payment rail stays real.
 
 ## Reproduce it yourself
 
@@ -115,12 +119,10 @@ Tips that make the demo seamless:
   `pnpm -> tsx -> node` launch means a wrapper Ctrl-C may leave the `node` grandchild running and
   still bidding. Reap the actual `node` PID, never `taskkill /IM node.exe`.
 
-## Why this is the rubric headline
+## What makes this work
 
-| Rubric line | What this demo shows |
-|-------------|----------------------|
-| **SpacetimeDB is the primary backend** | The only thing the human and the two agents share is the database. There is no app server between them. |
-| **Hosted and working** | It all runs on Maincloud `crash-y77jx` -- a remote, hosted database, not a local dev loop. |
-| **Heavily real-time** | Each bid is a table delta streamed to every client; the human and agents react to each other in about a second. |
-| **Clever / novel use** | The auction closes itself with a **scheduled reducer** -- the clock lives inside the database, with no client, cron, or worker awake. |
-| **SpacetimeDB + LLMs / agents** | The other bidders are autonomous agents connected under their own Identities -- people and agents transacting in one room. |
+- **One shared backend, no app server.** The only thing the human and the two agents share is the database; there is no Express/Fastify process brokering their bids.
+- **Hosted backend, not a local loop.** The demo connects to a remote SpacetimeDB Maincloud database, not a localhost dev server -- the real-time backbone is genuinely remote.
+- **Real-time by construction.** Each bid is a table delta streamed to every client; the human and agents react to each other in about a second.
+- **Self-settling auctions.** The auction closes itself with a scheduled reducer -- the clock lives inside the database, with no client, cron, or worker awake.
+- **Agents are first-class clients.** The other bidders are autonomous agents connected under their own identities -- people and agents transacting in one room.
