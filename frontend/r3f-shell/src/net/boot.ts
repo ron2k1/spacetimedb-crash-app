@@ -3,7 +3,7 @@
 // The headless engine writes <workspace>/.runtime/socket.json (mode 0600) AND a host then
 // surfaces it to the webview as `window.__CRASH_BOOT__`:
 //   - in browser dev, the Vite plugin in vite.config.ts reads socket.json and injects it
-//   - in a packaged Tauri build, Rust injects it (future; not in the 6/1 slice)
+//   - in a packaged Tauri build, Rust injects it (future; not in the v0.1 slice)
 //
 // This module is the renderer's single entry point for "where do I connect and with what
 // token". It validates shape only and returns synthetic error CODES on failure -- it never

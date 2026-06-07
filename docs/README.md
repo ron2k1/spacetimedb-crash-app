@@ -5,9 +5,6 @@ side (`protocol/`, `backend/`, `frontend/r3f-shell/`, `marketplace-server/`) plu
 project (`frontend/unity/`) and two Cargo crates: the Tauri shell and the **SpacetimeDB module**.
 
 ## Code
-- `spacetime-module/` -- **the SpacetimeDB backend** (Rust -> WASM): the marketplace + live-auction
-  tables and reducers, published into the hosted `crash-y77jx` database. See
-  [`SPACETIMEDB.md`](SPACETIMEDB.md) for the data model, reducer contracts, and migration plan.
 - `protocol/` -- the frozen 35-event socket contract (`src/events.ts`), its C# mirror
   (`Protocol.cs`), one example per event, and a drift-guard test. Carries the single-user agent run.
 - `backend/` -- `@crash/engine`: the headless token-gated WebSocket host and the
@@ -18,6 +15,12 @@ project (`frontend/unity/`) and two Cargo crates: the Tauri shell and the **Spac
   and injects the boot descriptor in a packaged build.
 - `frontend/unity/` -- the Unity 6 parity client (C# project), a second renderer over the same
   contract.
+- `marketplace-server/` -- the fixed-price storefront (`@crash/marketplace-server`): Express +
+  WebSocket, a seeded catalog, and the real x402 micropayment rail.
+- `spacetime-module/` -- the multiplayer auction backend (Rust -> WASM): the live-auction tables
+  and reducers, published to a hosted SpacetimeDB (Maincloud) module that the renderer and headless
+  bid bots subscribe to. Proven end-to-end in [`DEMO.md`](DEMO.md). See [`SPACETIMEDB.md`](SPACETIMEDB.md)
+  for the data model and reducer contracts.
 
 ## Design docs (`docs/superpowers/`)
 - `specs/` -- design specs. The current product shape supersedes the earliest 3D spec; read the
@@ -35,8 +38,9 @@ The app foundation is green (build, typecheck, and tests across the workspace), 
 frozen at v3 (35 events), the engine's provider-agnostic spine is live, and the R3F + Tauri shell
 renders the live dashboard-world.
 
-For the **SpacetimeDB hackathon**, the database becomes the real-time backbone for a multiplayer
-marketplace + live auctions. The module is scaffolded and the schema is designed
-([`SPACETIMEDB.md`](SPACETIMEDB.md)); the Express + WebSocket `marketplace-server` is the source of
-truth being ported. See the repo root `README.md` for the honest "live today vs. in progress"
-snapshot.
+The multiplayer auction house is built on a SpacetimeDB module
+([`SPACETIMEDB.md`](SPACETIMEDB.md)) -- the real-time backbone for live auctions where humans and
+agents bid in one shared room. It is wired end-to-end and proven in [`DEMO.md`](DEMO.md): the desktop
+renderer and headless bid bots subscribe to the module and an auction self-settles server-side. The
+Express + WebSocket `marketplace-server` carries the fixed-price storefront and the x402 payment
+rail. See the repo root `README.md` for the honest "what works today" snapshot.

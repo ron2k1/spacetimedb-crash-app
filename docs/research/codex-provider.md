@@ -240,7 +240,7 @@ User-scoped marketplaces can live at:
 ~/.agents/plugins/marketplace.json
 ```
 
-Provider implication: plugins are better treated as install/setup-time dependencies, not per-run payloads. For the Monday demo, use repo/workspace skills directly unless the demo specifically needs a bundled MCP/app integration. If Crash ever installs plugins for the user, it should present an explicit consent step because plugins can add MCP surface area and external-app auth flows.
+Provider implication: plugins are better treated as install/setup-time dependencies, not per-run payloads. For the v0.1 demo, use repo/workspace skills directly unless the demo specifically needs a bundled MCP/app integration. If Crash ever installs plugins for the user, it should present an explicit consent step because plugins can add MCP surface area and external-app auth flows.
 
 ### 5. Auth
 
@@ -291,5 +291,5 @@ Crash security recommendation:
 
 - Should Crash use the user's normal Codex home or launch with a Crash-specific `CODEX_HOME`? A separate home isolates config but also requires a separate login flow.
 - Should MCP server definitions be passed with repeated `-c` overrides or written to a Crash-owned `.codex/config.toml` in a trusted workspace?
-- Does the engine need plugin installation in v0.1, or can skills cover Monday's provider-agnostic demo?
+- Does the engine need plugin installation in v0.1, or can skills cover the v0.1 provider-agnostic demo?
 - What is the shared normalized event envelope before conversion into the frozen Crash renderer events?

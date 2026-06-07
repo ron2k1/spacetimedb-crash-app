@@ -33,7 +33,7 @@ Which part of the system would this touch? Pick the closest one(s).
 
 ## Protocol impact
 
-<!-- protocol/src/events.ts is the frozen contract (27 event types, PROTOCOL_VERSION 3). -->
+<!-- protocol/src/events.ts is the frozen contract (35 event types, PROTOCOL_VERSION 3). -->
 
 - [ ] This needs NO protocol change.
 - [ ] This would need a new or changed event shape (describe it below; it must be reviewed before the contract changes).

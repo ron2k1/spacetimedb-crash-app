@@ -7,8 +7,8 @@ blank_issues_enabled: true
 
 contact_links:
   - name: Contributing guide
-    url: https://github.com/ron2k1/crash/blob/main/CONTRIBUTING.md
+    url: https://github.com/ron2k1/crash-app/blob/main/CONTRIBUTING.md
     about: Setup, the dual-renderer layout, how to run the engine + shell, the local gate, and the security rules. Read this before opening a PR.
   - name: Security and the socket model
-    url: https://github.com/ron2k1/crash/blob/main/CONTRIBUTING.md#security-rules-these-are-hard-rules
+    url: https://github.com/ron2k1/crash-app/blob/main/CONTRIBUTING.md#security-rules-these-are-hard-rules
     about: How the loopback + per-session-token socket works and the rule that error paths emit codes, never messages. Never include a token or credential in an issue.

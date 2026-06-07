@@ -3,8 +3,8 @@
 // The "Test Agent / Test Skill" demo flow (see components/dashboard/TestRunModal.tsx) is mostly a
 // SIMULATION -- the x402/USDC settlement and the Phinite orchestration trace are staged for the demo
 // and move no real funds. The ONE genuinely live beat is this inference call, so the demo really does
-// "hit Phinite AI". The key is a throwaway hackathon tester key injected at BUILD time by Vite from a
-// gitignored .env (VITE_GMI_API_KEY) -- it is never committed and is rotated after the demo.
+// "hit Phinite AI". The key is a throwaway demo tester key injected at BUILD time by Vite from a
+// gitignored .env (VITE_GMI_API_KEY) -- it is never committed and is rotated after each demo.
 //
 // Robustness: if the key is absent, or the call fails (CORS, offline, bad model, timeout), runGmiChat
 // throws and the caller falls back to canned copy so the on-stage sequence never stalls. We read the

@@ -5,7 +5,7 @@
 #   marketplace  -> Azure Container Apps  (Node/Express+WS, port 8787)
 #   web          -> Azure Static Web Apps (Vite React SPA, dist/)
 #
-# Run order:  azd auth login  ->  azd env new crash-hackathon  ->
+# Run order:  azd auth login  ->  azd env new crash-prod  ->
 #             azd env set <SECRET_VARS>  ->  azd up
 # See docs/DEPLOY.md for the full runbook.
 

@@ -38,7 +38,7 @@ corepack prepare pnpm@10.33.0 --activate
 You only need the Rust toolchain if you are touching the Tauri shell or running its
 `cargo test`. Pure engine, protocol, and web-bundle work does not require Rust.
 
-Windows is the demo target OS for the 6/1 PoC Fest. The TypeScript side is cross-platform;
+Windows is the primary target OS for the desktop build. The TypeScript side is cross-platform;
 the shell's desktop bundle and the Unity client are exercised on Windows.
 
 ## Repository layout
@@ -61,7 +61,7 @@ Tauri shell and a C# project for Unity.
 Clone, then install the whole workspace from the repo root:
 
 ```powershell
-git clone https://github.com/ron2k1/crash.git
+git clone https://github.com/ron2k1/crash-app.git
 pnpm install
 ```
 
@@ -177,7 +177,7 @@ and a short security checklist.
 ## The protocol is the contract: treat `protocol/` as frozen
 
 `protocol/src/events.ts` is the single source of truth for the socket. It currently defines
-27 event types (10 renderer-to-engine and 17 engine-to-renderer) at `PROTOCOL_VERSION = 3`,
+35 event types (12 renderer-to-engine and 23 engine-to-renderer) at `PROTOCOL_VERSION = 3`,
 with a hand-mirrored C# copy in `protocol/Protocol.cs` kept in sync by a drift-guard test.
 
 The engine and both renderers depend on this file, so do not change an event shape casually.

@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Local secrets -- GMI/Phinite hackathon tester key for the Test-Agent demo flow. NEVER commit.
+# Local secrets -- GMI/Phinite demo tester key for the Test-Agent demo flow. NEVER commit.
 # The tracked template is .env.example; real values live only in the gitignored .env.
 .env
 .env.*
