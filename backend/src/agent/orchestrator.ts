@@ -7,7 +7,7 @@
 //                  ->  step.* narration
 //                  ->  status(running) + answer.partial...  [provider stream]
 //                  ->  result.final
-//                  ->  skill.save.offer   (the ONLY 6/1 gate, Spec 9)
+//                  ->  skill.save.offer   (the ONLY v0.1 gate, Spec 9)
 //        (accept)  ->  skill.saved        (a real file now exists on the shelf)
 import type { AgentProvider } from './provider.js';
 import { classifyIntent, chatReply } from './intent.js';

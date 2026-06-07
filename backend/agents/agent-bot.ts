@@ -1,10 +1,10 @@
 // agent-bot.ts -- a headless SpacetimeDB client that bids in Crash's live auctions as a first-class agent.
 //
-// This is the rubric's "STDB + LLM/agents" + "heavily real-time" bonus made concrete: an autonomous
+// It makes "agents are first-class marketplace participants" concrete: an autonomous
 // process connects to the SAME hosted module the browser uses, registers itself in the `agent` table, and
 // competes in the SAME auctions a human is bidding in -- in real time, with no shared code path between
 // them beyond the database. A human in the browser and two of these bots fighting over one lot, settling
-// server-side, is the demo.
+// server-side, is the showcase.
 //
 // HOW IT WORKS (no polling -- purely reactive):
 //   1. Connect to Maincloud with a persisted token (stable Identity per bot; see tokenStore.ts).

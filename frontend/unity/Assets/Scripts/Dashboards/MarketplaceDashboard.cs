@@ -140,7 +140,7 @@ namespace Crash.Dashboards
         // Read + parse StreamingAssets/catalog/<kind>s.json. Returns null on any failure (the
         // panel just shows "catalog unavailable"). NOTE: on Android/WebGL streamingAssetsPath is
         // a URL, not a file path, and File.ReadAllText will not work -- this targets the desktop
-        // build (the only target for the PoC). A platform UnityWebRequest path would be needed
+        // build (the only supported target for now). A platform UnityWebRequest path would be needed
         // for those targets.
         private List<CatalogItem> LoadCatalog()
         {

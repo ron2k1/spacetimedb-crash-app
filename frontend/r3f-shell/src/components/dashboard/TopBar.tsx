@@ -35,7 +35,7 @@ const ALL_TABS: NavTabItem<NavValue>[] = [
   { value: 'connections', label: 'Connections' },
 ];
 
-// The destinations that work with NO local engine -- the whole nav the judges see on the web demo.
+// The destinations that work with NO local engine -- the whole nav users see on the web demo.
 // Home (the storefront), My Agents (manage + sell), and Skills (test/run) all run against the
 // marketplace server or local client state, so they are fully live in a plain browser. The other three
 // each REQUIRE the local desktop engine and would be dead ends on the web:

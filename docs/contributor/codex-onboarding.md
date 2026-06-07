@@ -6,16 +6,17 @@
 
 ## The paste-ready prompt
 
-You are joining a hackathon project called **Crash** as a technical contributor. You work
+You are joining an open-source project called **Crash** as a technical contributor. You work
 through your own **OpenAI Codex CLI**, authenticated against your own OpenAI/Codex
 subscription. Your teammate (the lead) works through Claude Code. Read this whole message,
 then start.
 
 ### What Crash is
-Crash is "ABCmouse for AI": a guided AI-literacy desktop app where a non-technical person
-(think: a 65-year-old) points at something on their computer and a 3D fox narrates while
-the app builds them a real, re-runnable **skill**. It runs on the user's own machine. The
-pitch is Monday 2026-06-01 (PoC Fest).
+Crash is a desktop **agent marketplace** with a built-in, provider-agnostic agent engine: a
+user brings their own Claude Code or Codex login, asks Crash to do something, and a headless
+engine drives the CLI while a 3D guide narrates -- and the marketplace lets agents and people
+buy, sell, and bid on agents and skills, with a real x402 micropayment rail. It runs on the
+user's own machine.
 
 ### The one architectural idea you most need to understand: the provider interface
 Crash is **provider-agnostic**. The engine speaks ONE internal contract, and the actual AI
@@ -23,8 +24,8 @@ CLI underneath is swappable:
 - `ClaudeCodeProvider` -- drives Claude Code (the lead owns this)
 - `CodexProvider` -- drives OpenAI Codex (this is YOURS)
 
-A user brings their OWN subscription: Claude Code OR OpenAI Codex. Both must be demoable
-Monday. This works because both CLIs expose the same four primitives the engine needs:
+A user brings their OWN subscription: Claude Code OR OpenAI Codex. Both must be demoable.
+This works because both CLIs expose the same four primitives the engine needs:
 1. **Headless agent runs** -- run a prompt non-interactively and stream back results
 2. **MCP servers** -- register Model Context Protocol tool servers
 3. **Skills** -- save/load reusable skill definitions
@@ -35,7 +36,7 @@ must NOT require any change to the wire protocol or the renderer. The renderer (
 never learns which provider is underneath.
 
 ### Your repo + branch
-1. Clone: `git clone https://github.com/ron2k1/crash.git`
+1. Clone: `git clone https://github.com/ron2k1/crash-app.git`
 2. Create your branch: `git checkout -b feat/codex-provider-research`
 3. You have collaborator access. Work ONLY on your branch. Open a PR against `main`; never
    push to `main` directly.
@@ -43,7 +44,7 @@ never learns which provider is underneath.
 ### Read these first (in the repo)
 - `docs/superpowers/specs/2026-05-29-crash-abcmouse-for-ai-design.md` -- the approved design
   spec (Rev 3). Focus on: Section 3.1 (the frozen socket event set), 3.2 (the provider
-  interface + build-vs-runtime fan-out), 13 (BYO gate: Claude Code OR Codex), 18 (Monday
+  interface + build-vs-runtime fan-out), 13 (BYO gate: Claude Code OR Codex), 18 (v0.1
   scope), 23 (the two-person workflow -- this section is about you).
 - `docs/superpowers/plans/2026-05-29-crash-monorepo-and-protocol.md` -- the foundation plan
   the lead is executing now (monorepo + the frozen `protocol/` contract).

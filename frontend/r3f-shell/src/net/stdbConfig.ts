@@ -1,13 +1,13 @@
 // stdbConfig.ts -- where the renderer's SpacetimeDB client points, and the knobs to retarget it.
 //
-// DEFAULT = Maincloud (the hosted module crash-y77jx), so the hackathon "hosted + working"
-// requirement is satisfied out of the box: clone, `pnpm shell:dev`, and the storefront is live
+// DEFAULT = Maincloud (the hosted module crash-y77jx), so the hosted module is the default
+// out of the box: clone, `pnpm shell:dev`, and the storefront is live
 // against the same database every other client sees. No env file needed for the happy path.
 //
 // OVERRIDE for a venue with flaky WiFi (or a fully offline demo): set VITE_STDB_URI to a local
 // server (e.g. ws://127.0.0.1:3000) and VITE_STDB_MODULE to the locally-published module name, then
-// `spacetime start` + `spacetime publish` locally. Same client code, different endpoint -- the
-// seamless-fallback path the judges reward.
+// `spacetime start` + `spacetime publish` locally. Same client code, different endpoint -- a
+// seamless offline-fallback path.
 //
 // SECURITY: the only credential involved is the server-minted connection token the SDK caches under
 // STDB_TOKEN_KEY so a reload keeps the SAME anonymous demo Identity (its listings/bids stay

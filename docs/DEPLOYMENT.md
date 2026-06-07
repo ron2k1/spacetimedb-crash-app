@@ -30,7 +30,7 @@ runtime ships.
 
 ## Prerequisites (build machine)
 
-The build runs on Windows (the 6/1 demo target OS). Install once:
+The build runs on Windows (the v0.1 target OS). Install once:
 
 | Tool                  | Why                                                | Notes                                                       |
 | --------------------- | -------------------------------------------------- | ----------------------------------------------------------- |
@@ -202,7 +202,7 @@ engine ships inside the app.
 | First-run curriculum seed into `~/Crash/skills/`    | NOT yet implemented  | Engine first-run (`ensureWorkspace` makes dirs)  |
 | App icons are stock Tauri template art              | PLACEHOLDER          | `src-tauri/icons/` (regenerate from a 1024 PNG)  |
 | Cargo manifest metadata is template default         | COSMETIC             | `src-tauri/Cargo.toml` (`description`, `authors`)|
-| Code signing                                        | NOT done             | Post-Monday; SmartScreen warns until then        |
+| Code signing                                        | NOT done             | Unsigned for now; SmartScreen warns until signed |
 | CSP is tightened but not yet verified in a build    | NEEDS VERIFICATION   | `tauri.conf.json` `app.security.csp`             |
 
 Notes on the last items:
@@ -217,5 +217,5 @@ Notes on the last items:
   three.js and Spline need. Verify the 3D scene and Spline still render in a
   packaged build; loosen a single directive if something is blocked rather than
   reverting to `null`.
-- Code signing: an unsigned installer triggers SmartScreen. For the 6/1 demo on
+- Code signing: an unsigned installer triggers SmartScreen. For the v0.1 demo on
   the operator's own laptop this is acceptable; sign before any public download.

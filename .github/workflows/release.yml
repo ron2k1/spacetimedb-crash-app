@@ -4,7 +4,7 @@
 # normal branch push or PR, so it stays out of the pre-merge feedback loop
 # (that fast loop lives in quick-check.yml).
 #
-# Pipeline (single Windows job, the Monday demo target OS):
+# Pipeline (single Windows job, Windows being the target OS):
 #   1. install the pnpm workspace
 #   2. build @crash/protocol then @crash/engine (tsc -> dist/)
 #   3. package the engine as a single self-contained sidecar exe and name it
@@ -13,7 +13,7 @@
 #      bundle), produces the NSIS installer, then creates a GitHub Release and
 #      uploads the installer as a release asset.
 #
-# The macOS / Linux matrix is deferred; Windows is the only 6/1 target.
+# The macOS / Linux matrix is deferred; Windows is the only v0.1 target.
 #
 # SECURITY: this workflow never reads, prints, or persists the per-session
 # capability token. That token is minted at runtime by the engine on the END

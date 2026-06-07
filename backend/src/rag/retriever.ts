@@ -2,7 +2,7 @@
 // the small relevant passage is later handed to the provider (Spec 5 privacy promise).
 //
 // This is the keyword/TF baseline retriever: zero external models, indexes incrementally
-// on an old CPU, and is good enough for the 6/1 read-only slice. The Passage[] interface
+// on an old CPU, and is good enough for the v0.1 read-only slice. The Passage[] interface
 // is the seam where an on-device embedding model drops in later WITHOUT touching the
 // orchestrator. (Spec 5 / 19.3.)
 import fs from 'node:fs';

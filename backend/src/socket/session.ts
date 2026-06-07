@@ -331,7 +331,7 @@ export class Session {
         break;
       }
       case 'confirm.response':
-        // No side-effecting gates exist in the read-only 6/1 slice (Spec 9). Reserved.
+        // No side-effecting gates exist in the read-only v0.1 slice (Spec 9). Reserved.
         break;
       case 'hello':
         // Handshake-only; ignored mid-session.

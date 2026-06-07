@@ -3,7 +3,7 @@
 # Crash -- pre-merge fast-feedback loop for the pnpm + Cargo monorepo.
 # Two jobs run in parallel on every push to main and every PR targeting main:
 #   ts   -- typecheck + unit tests across the pnpm workspace (ubuntu)
-#   rust -- cargo test for the Tauri shell crate (windows, the demo target OS)
+#   rust -- cargo test for the Tauri shell crate (windows, the primary target OS)
 # Target: ts under ~3 min on a warm cache; rust under ~5 min warm.
 #
 # The tag-gated release bundle lives in release.yml.

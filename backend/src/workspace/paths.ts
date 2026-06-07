@@ -48,7 +48,7 @@ export function ensureWorkspace(ws: Workspace): Workspace {
 // at an intermediate dir (e.g. a `skills/` reparse point planted outside root):
 // the subsequent mkdir/write would follow it. This is acceptable for the
 // single-user localhost desktop target (planting that symlink already requires
-// local write to ~/Crash -- the very capability the bypass would grant). POST-MONDAY
+// local write to ~/Crash -- the very capability the bypass would grant). FUTURE
 // HARDENING (tracked): realpath the root + verify destination ancestry before every
 // write, and reject reparse-point components in install destinations.
 /** Jail: resolve `target` and throw unless it is inside the workspace root. */
