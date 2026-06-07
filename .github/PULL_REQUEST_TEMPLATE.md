@@ -56,7 +56,7 @@
 
 ## Protocol impact
 
-<!-- protocol/src/events.ts is the frozen contract (27 event types, PROTOCOL_VERSION 3). -->
+<!-- protocol/src/events.ts is the frozen contract (35 event types, PROTOCOL_VERSION 3). -->
 
 - [ ] This PR does NOT change any event shape or `protocol/`.
 - [ ] This PR changes the protocol AND updates `Protocol.cs`, the affected example, bumps `PROTOCOL_VERSION`, and the drift-guard test passes.
