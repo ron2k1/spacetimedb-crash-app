@@ -13,12 +13,15 @@
 // storefront (and every other connected client) with no reconnect.
 
 import { createContext, useContext, type ReactNode } from "react";
-import { useMarketplace, type UseMarketplaceResult } from "./marketplaceClient";
+import type { UseMarketplaceResult } from "./marketplaceClient";
+import { useStdbMarketplace } from "./useStdbMarketplace";
 
 const MarketplaceContext = createContext<UseMarketplaceResult | null>(null);
 
 export function MarketplaceProvider({ children }: { children: ReactNode }) {
-  const market = useMarketplace();
+  // SpacetimeDB-backed: live listings/auctions/activity + reducer mutations come from the hosted module;
+  // the run stream + wallet still pass through from the marketplace-server inside useStdbMarketplace.
+  const market = useStdbMarketplace();
   return (
     <MarketplaceContext.Provider value={market}>
       {children}

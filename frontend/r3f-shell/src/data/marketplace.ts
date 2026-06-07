@@ -59,6 +59,16 @@ export const CATEGORY_GLOW: Record<MarketCategory, MarketGlow> = {
   tool: "green",
 };
 
+// Default emoji glyph for a category -- live SpacetimeDB listings carry no `icon` field, so the
+// adapter gives them a sensible category glyph that matches the visual language of the curated seed
+// above. Single source of truth for the category->icon fallback.
+export const ICON_FALLBACK_BY_CATEGORY: Record<MarketCategory, string> = {
+  agent: "🤖",
+  skill: "🧠",
+  workflow: "🧩",
+  tool: "⚙️",
+};
+
 export const CATEGORY_LABEL: Record<MarketCategory, string> = {
   agent: "Agents",
   skill: "Skills",
