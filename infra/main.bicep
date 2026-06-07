@@ -7,7 +7,7 @@ targetScope = 'resourceGroup'
 // derived here via uniqueString so every resource name is globally unique.
 // ---------------------------------------------------------------------------
 
-@description('Azure Developer CLI environment name (e.g. crash-hackathon).')
+@description('Azure Developer CLI environment name (e.g. crash-prod).')
 param environmentName string
 
 @description('Azure region for all resources.')

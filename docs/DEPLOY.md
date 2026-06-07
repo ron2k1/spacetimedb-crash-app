@@ -35,7 +35,7 @@ first deploy; azd uses your user credentials.
 ### Step b -- Create a named environment
 
 ```
-azd env new crash-hackathon
+azd env new crash-prod
 ```
 
 azd will prompt for:
@@ -43,7 +43,7 @@ azd will prompt for:
 - **Azure region** -- pick a region that has Container Apps + Static Web Apps
   (e.g. `eastus`, `westus2`, `eastus2`, `westeurope`).
 
-The environment stores your choices in `.azure/crash-hackathon/` (gitignored
+The environment stores your choices in `.azure/crash-prod/` (gitignored
 by azd's .gitignore fragment; do not commit it).
 
 ### Step c -- Set secret environment variables
